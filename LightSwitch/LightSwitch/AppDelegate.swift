@@ -27,7 +27,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                        modifierFlags: NSEvent.ModifierFlags(rawValue: 0),
                                        timestamp: 0,
                                        windowNumber: w.windowNumber,
-                                       context: w.graphicsContext,
+                                       context: NSGraphicsContext.init(),
                                        eventNumber: 0,
                                        clickCount: 1,
                                        pressure: 0)!
@@ -52,23 +52,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
     }
+    
+    func darkMode() {
+        let darkMode = #"tell app "System Events" to tell appearance preferences to set dark mode to not dark mode"#
+        var error: NSDictionary?
+        if let scriptObject = NSAppleScript(source: darkMode) {
+            if let output: NSAppleEventDescriptor = scriptObject.executeAndReturnError(
+                &error) {
+            } else if (error != nil) {
+                print("Error: \(String(describing: error))")
+            }
+        }
+    }
 
-    // Turn dark mode on/off when user clicks on app icon
     @objc func statusBarButtonClicked(sender: NSStatusBarButton) {
         let event = NSApp.currentEvent!
         
         if event.type == NSEvent.EventType.leftMouseUp {
-            let darkMode = #"tell app "System Events" to tell appearance preferences to set dark mode to not dark mode"#
-            var error: NSDictionary?
-            if let scriptObject = NSAppleScript(source: darkMode) {
-                if let output: NSAppleEventDescriptor = scriptObject.executeAndReturnError(
-                    &error) {
-                } else if (error != nil) {
-                    print("Error: \(String(describing: error))")
-                }
-            }
+            // toggle dark mode on/off
+            darkMode()
         }
         else {
+            // show menu
             displayMenu()
         }
     }
